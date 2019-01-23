@@ -10,27 +10,19 @@ public class DragonStats : MonoBehaviour {
     public float hunger;
     public Slider hungerSlider;
     public Text hungerText;
-    public Transform h;
+    public StatFiller h; //hunger
     [Range(0, 100)]
     public float thirst;
     public Slider thirstSlider;
     public Text thirstText;
-    public Transform t;
+    public StatFiller t; //thirst / drinking
     [Range(0, 100)]
     public float sleep;
     public Slider sleepSlider;
     public Text sleepText;
-    public Transform s;
+    public StatFiller s; //sleeping
 
-    // these are the values used when he is playing with fire //
-    [Space]
-    public Transform f;
-    public bool isFiring;
-    public GameObject head;
-    public Transform shootingTarget;
-    public float shootCooldown;
-    public ParticleSystem fireBall;
-    private bool doesntWantToPlay; //best name 2019//
+    public StatFiller f; //playing / firing
 
     [Space]
 
@@ -46,10 +38,12 @@ public class DragonStats : MonoBehaviour {
 
     // this is the min. value which something can go before the ai chooses to go there //
     public float minValue;
+    public float playingThreshold = 80;
+    public bool doesntWantToPlay;
 
     [Space]
     public UnityEngine.AI.NavMeshAgent agent;
-    public Animator an;
+    public Animator an; //the animator on DragonMove.cs
 
     private void Start()
     {
@@ -64,101 +58,36 @@ public class DragonStats : MonoBehaviour {
 
         SetValues();
         ControlStats(); //these refer to functions that maintain the stats//
-        FillStats();
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            doesntWantToPlay = false;
-            StopCoroutine("GoToSleep"); //this will stop a timer//
-        }
 	}
-
-    public void FillStats() //this increases the values when the ai is near their locations//
-    {
-        if (Vector3.Distance(h.position, gameObject.transform.position) < 2)
-        {
-            hunger = hunger + (3 * Time.deltaTime);
-            hunger = Mathf.Clamp(hunger, 1, 100);
-        }
-
-        if (Vector3.Distance(t.position, gameObject.transform.position) < 3)
-        {
-            thirst = thirst + (3 * Time.deltaTime);
-            thirst = Mathf.Clamp(thirst, 1, 100);
-        }
-
-        if(Vector3.Distance(f.position, gameObject.transform.position) < 3)
-        {
-            head.transform.LookAt(shootingTarget.transform);
-            if (!isFiring)
-            {
-                isFiring = true;
-                StartCoroutine("Fireballs");
-                StartCoroutine("GoToSleep");
-            }
-            else
-            {
-                StopCoroutine("Fireballs");
-            }
-        }
-        else
-        {
-            isFiring = false;
-            fireBall.Stop();
-        }
-
-        if (Vector3.Distance(s.position, gameObject.transform.position) < 3)
-        {
-            sleep = sleep + (3 * Time.deltaTime);
-            sleep = Mathf.Clamp(sleep, 1, 100);
-            an.SetBool("Sleeping", true);
-        }
-        else
-        {
-            if(Vector3.Distance(s.position,gameObject.transform.position) > 3)
-            {
-                an.SetBool("Sleeping", false);
-            }
-        }
-    }
-
-    public void LateUpdate()
-    {
-        if (Vector3.Distance(f.position, gameObject.transform.position) < 3)
-        {
-            head.transform.LookAt(shootingTarget.transform);
-            head.transform.rotation = new Quaternion(head.transform.rotation.x, head.transform.rotation.y - 180, head.transform.rotation.z, 0);
-        }
-    }
 
     public void ControlStats() // this makes the ai go to the place it needs for food, water or sleep //
     {
         if (hunger < minValue)
         {
-            agent.SetDestination(h.position);
+            agent.SetDestination(h.transform.position);
             an.SetBool("Walking", true);
             doesntWantToPlay = false;
         }
 
         if (thirst < minValue)
         {
-            agent.SetDestination(t.position);
+            agent.SetDestination(t.transform.position);
             an.SetBool("Walking", true);
             doesntWantToPlay = false;
         }
 
         if (sleep < minValue)
         {
-            agent.SetDestination(s.position);
+            agent.SetDestination(s.transform.position);
             an.SetBool("Walking", true);
             doesntWantToPlay = false;
         }
 
-        if(hunger > 80 && thirst > 80 && sleep > 80 && !doesntWantToPlay)
+        if(hunger > playingThreshold && thirst > playingThreshold && sleep > playingThreshold && !doesntWantToPlay) //this one is for when the ai has plenty of everything//
         {
-            if (Vector3.Distance(gameObject.transform.position, f.position) > 3)
+            if (Vector3.Distance(gameObject.transform.position, f.transform.position) > 3)
             {
-                agent.SetDestination(f.position);
+                agent.SetDestination(f.transform.position);
                 an.SetBool("Walking", true);
                 doesntWantToPlay = false;
             }
@@ -173,22 +102,5 @@ public class DragonStats : MonoBehaviour {
         thirstText.text = Mathf.Round(thirst).ToString() + "%";
         sleepSlider.value = sleep;
         sleepText.text = Mathf.Round(sleep).ToString() + "%";
-    }
-
-    public IEnumerator Fireballs() // this shoots the fireballs //
-    {
-        fireBall.Play();
-        print("Fireball Shoot");
-        yield return new WaitForSeconds(shootCooldown);
-        StartCoroutine("Fireballs");
-    }
-
-    public IEnumerator GoToSleep() // this makes the ai rest after playing // 
-    {
-        yield return new WaitForSeconds(10);
-        doesntWantToPlay = true;
-        fireBall.Stop();
-        agent.SetDestination(s.position);
-        an.SetBool("Walking", true);
     }
 }

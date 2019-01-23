@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class StatFiller : MonoBehaviour {
 
-    public DragonStats dS;
-
     //disclaimer: this is not actually the player but the player can control it//
     public GameObject player;
+    public DragonStats dS;
     
     [Space]
     
@@ -15,37 +14,45 @@ public class StatFiller : MonoBehaviour {
     public float regenValue;
 
     [Tooltip("")]
-    public float range = 2;
+    public float range = 2; //range in which the statfiller fills the stats//
 
-    public enum Resource
+    public bool inRange; //true when the ai is within the chosen range//
+
+    public enum Resource //the two default types which do nothing inheritance worthy//
     {
         Hunger,
-        Water 
-        //the other two types are added via inheritance//
+        Water
     }
 
     public Resource resource;
-
-    void Update ()
+    
+    public virtual void Update ()
     {
 		if(Vector3.Distance(player.transform.position, transform.position) <= range)
         {
-            AddValue();
+            AddValue(); //this functions has a different effect depending on the script it's in//
+            inRange = true;
+        }
+        else
+        {
+            inRange = false;
         }
 	}
 
-    public void AddValue() //this function will be altered via inheritance//
+    public virtual void AddValue() //this function will be altered via inheritance//
     {
         float amount;
         amount = regenValue * Time.deltaTime;
 
-        switch (resource)
+        switch (resource) //this makes sure the right values are changed//
         {
             case Resource.Hunger:
                 dS.hunger += amount;
+                Mathf.Clamp(dS.hunger, 0, 100);
                 break;
             case Resource.Water:
                 dS.thirst += amount;
+                Mathf.Clamp(dS.thirst, 0, 100);
                 break;
             default:
                 break;

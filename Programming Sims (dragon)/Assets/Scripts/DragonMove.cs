@@ -5,14 +5,14 @@ using UnityEngine.AI;
 
 public class DragonMove : MonoBehaviour {
 
-    public Vector3 target;
-    public NavMeshAgent agent;
-    public LayerMask lM;
-    public GameObject cam;
+    public Vector3 target; //the target where to ai should go
+    public NavMeshAgent agent; //the navmesh agent
+    public LayerMask lM; //the layermask to make sure you dont hit something you shouldn't
+    public GameObject cam; //believe it or not but this would seem to be the camera
 
     public bool isWalking;
 
-    public Animator a;
+    public Animator a; //the animator
 
     public GameObject prefabEffect; //the effect that plays when you click somewhere//
 
