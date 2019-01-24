@@ -33,12 +33,12 @@ public class DragonMove : MonoBehaviour {
 
         if (Input.GetButtonDown("Fire1")) // This part gets the position of the cursor and makes the dragon walk to it //
         {
-            print("Fire");
+            //print("Fire");
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out hit, lM)) 
             {
-                print("hit");
+                //print("hit");
                 target = hit.point;
 
                 agent.SetDestination(target);
@@ -65,7 +65,5 @@ public class DragonMove : MonoBehaviour {
         {
             a.SetBool("Walking", true);
         }
-
-        //print(a.get
 	}
 }
